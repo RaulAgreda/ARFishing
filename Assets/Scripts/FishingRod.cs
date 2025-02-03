@@ -12,8 +12,9 @@ public class FishingRod : MonoBehaviour
     private void Update() {
         if (TryGetClosestPlane(out Vector3 pos))
             baitPos = pos;
-            
-        bait.position = Vector3.Lerp(bait.position, baitPos, lerpTime * Time.deltaTime);
+        Vector3 newPosition = Vector3.Lerp(bait.position, baitPos, lerpTime * Time.deltaTime);
+        newPosition.y = baitPos.y;
+        bait.position = newPosition;
     }
 
     bool TryGetClosestPlane(out Vector3 hit)

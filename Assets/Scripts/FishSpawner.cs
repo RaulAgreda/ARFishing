@@ -3,15 +3,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.Events;
 
 public class FishSpawner : MonoBehaviour
 {
     [SerializeField] float spawnRadius = 1;
     [SerializeField] float spawnTime = 0.5f;
+    [SerializeField] float catchTime = 0.5f;
+    [SerializeField] float baitRaycastLength = 0.1f;
     [SerializeField] ARRaycastManager raycastManager;
     [SerializeField] GameObject fishPrefab;
-    List<GameObject> currentFish = new();
+    Dictionary<int, GameObject> currentFish = new();
+    public Transform catchAlert;
     public Transform bait;
+
+    int _fishId = 0;
+
+    public void ClearFishes()
+    {
+        foreach (var fish in currentFish.Values)
+        {
+            Destroy(fish);
+        }
+        currentFish.Clear();
+    }
 
     public void Spawn(Vector3 spawnPosition)
     {
@@ -23,9 +38,59 @@ public class FishSpawner : MonoBehaviour
         Vector3 finalPosition = spawnPosition + randomDir;
         GameObject newFish = Instantiate(fishPrefab, finalPosition,
         Quaternion.Euler(0, Random.Range(0, 360), 0));
-        currentFish.Add(newFish);
-        newFish.GetComponent<FishMovement>().bait = bait;
-        StartCoroutine(FishSpawnAnimation(newFish.GetComponentInChildren<SpriteRenderer>()));
+        currentFish.Add(_fishId, newFish);
+        FishMovement fish = newFish.GetComponent<FishMovement>();
+        fish.bait = bait;
+        fish.fishId = _fishId;
+        fish.OnCatch += OnBait;
+        StartCoroutine(FishSpawnAnimation(newFish.GetComponentInChildren<SpriteRenderer>(), spawn:true));
+        _fishId++;
+    }
+
+    private void OnBait(int fishId)
+    {
+        catchAlert.gameObject.SetActive(true);
+        StartCoroutine(CatchTimer(fishId));
+    }
+
+    IEnumerator CatchTimer(int fishId)
+    {
+        float timer = 0;
+        while(timer < catchTime)
+        {
+            if (!IsBaitOnWater())
+            {
+                print("Yeah! I caught a fish");
+                Destroy(currentFish[fishId]);
+                currentFish.Remove(fishId);
+                catchAlert.gameObject.SetActive(false);
+                FindFirstObjectByType<FishDialogs>().GetRandomFish();
+                yield break;
+            }
+            yield return null;
+            timer += Time.deltaTime;
+        }
+        StartCoroutine(FishSpawnAnimation(currentFish[fishId].GetComponentInChildren<SpriteRenderer>(), false));
+        Destroy(currentFish[fishId], spawnTime + 0.1f);
+        currentFish.Remove(fishId);
+        catchAlert.gameObject.SetActive(false);
+        FindFirstObjectByType<FishDialogs>().LostCatch();
+    }
+
+    bool IsBaitOnWater()
+    {
+        List<ARRaycastHit> hits = new();
+        if (raycastManager.Raycast(new Ray(bait.position + new Vector3(0,0.1f,0), Vector3.down), hits, TrackableType.PlaneWithinBounds))
+        {
+            foreach (var hit in hits)
+            {
+                if (hit.trackable is ARPlane plane && plane.alignment == PlaneAlignment.HorizontalUp)
+                {
+                    return hit.distance < baitRaycastLength;
+                }
+            }
+        }
+        return false;
     }
 
     private bool TryGetClosestPlane(out Vector3 spawnPosition)
@@ -48,7 +113,13 @@ public class FishSpawner : MonoBehaviour
     }
 
     private void Start() {
-        StartCoroutine(StartSpawning());   
+        _fishId = 0;
+        StartCoroutine(StartSpawning());
+        catchAlert.gameObject.SetActive(false);
+    }
+
+    private void Update() {
+        // print("IsBait on water: " + IsBaitOnWater());
     }
 
     private IEnumerator StartSpawning()
@@ -64,7 +135,7 @@ public class FishSpawner : MonoBehaviour
         }
     }
 
-    IEnumerator FishSpawnAnimation(SpriteRenderer newFishRenderer)
+    IEnumerator FishSpawnAnimation(SpriteRenderer newFishRenderer, bool spawn)
     {
         // Fade the fish from transparent to opaque
         float time = 0;
@@ -72,11 +143,13 @@ public class FishSpawner : MonoBehaviour
         while (time < spawnTime)
         {
             color.a = time / spawnTime;
+            if (!spawn)
+                color.a = 1 - color.a;
             newFishRenderer.color = color;
             time += Time.deltaTime;
             yield return null;
         }
-        color.a = 1;
+        color.a = spawn? 1: 0;
         newFishRenderer.color = color;
     }
 }

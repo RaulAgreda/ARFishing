@@ -1,25 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.XR.ARFoundation;
 
 public class FishMovement : MonoBehaviour
 {
-    enum FishState { Idle, RandomMove, FollowingTarget, lookToBait, movingToBait, bittenBait };
+    enum FishState { Idle, RandomMove, FollowingTarget, lookToBait, movingToBait, movingBack, bittenBait };
 
     FishState currentFishState;
     [SerializeField] float maxSpeed = 1;
     [SerializeField] float minSpeed = 0.1f;
+    [SerializeField] float movingToBaitSpeed = 0.1f;
     [SerializeField] float randomRadius = 0.1f;
     [SerializeField] float rotationLerp = 0.5f;
     [SerializeField] float detectionAngle = 15f;
     [SerializeField] float maxDetectionDistance = 0.1f;
-
+    public int fishId;
     public Transform bait;
     private Vector3 currentTargetPos;
     private float currentSpeed;
 
     ARPlaneManager planeManager;
+    float _backDistance = 0;
+
+    public UnityAction<int> OnCatch;
 
     private void Start() {
         planeManager = FindFirstObjectByType<ARPlaneManager>();
@@ -47,20 +52,18 @@ public class FishMovement : MonoBehaviour
 
     float AngleTo(Vector3 position)
     {
-        position.y = transform.position.y;
         return Vector3.Angle(position - transform.position, transform.forward);
     }
 
     float DistanceTo(Vector3 position)
     {
-        position.y = transform.position.y;
         return Vector3.Distance(position, transform.position);
     }
 
     void GoBack()
     {
-        float randomDistance = Random.Range(minSpeed, maxSpeed);
-        transform.Translate(-randomDistance * Time.deltaTime * Vector3.forward);
+        _backDistance = Random.Range(minSpeed, maxSpeed) * 2;
+        transform.Translate(_backDistance * Time.deltaTime * Vector3.back);
     }
 
     private void Update() {
@@ -94,11 +97,34 @@ public class FishMovement : MonoBehaviour
         }
         else if (currentFishState == FishState.movingToBait)
         {
+            currentSpeed = movingToBaitSpeed;
+            LookTarget(bait.position);
             GoForward();
             if (!DetectBait())
             {
                 currentFishState = FishState.Idle;
             }
+            if (DistanceTo(bait.position) < 0.01f)
+            {
+                if (Random.Range(0,1f) < 0.25f)
+                {
+                    currentFishState = FishState.bittenBait;
+                    OnCatch.Invoke(fishId);
+                    print("Bitten!");
+                }
+                else
+                {
+                    GoBack();
+                    currentFishState = FishState.movingBack;
+                }
+            }
+        }
+        else if (currentFishState == FishState.movingBack)
+        {
+            if (DistanceTo(bait.position) <= _backDistance)
+                GoBack();
+            else
+                currentFishState = FishState.movingToBait;
         }
     }
     
