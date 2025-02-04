@@ -47,16 +47,20 @@ public class FishMovement : MonoBehaviour
     {
         float angle = AngleTo(bait.position);
         float distance = DistanceTo(bait.position);
-        return angle <= detectionAngle / 2 && distance < maxDetectionDistance;
+        return angle <= detectionAngle / 2 && distance < maxDetectionDistance && FishingRod.Instance.IsBaitOnWater();
     }
 
     float AngleTo(Vector3 position)
     {
-        return Vector3.Angle(position - transform.position, transform.forward);
+        Vector3 pos = position;
+        pos.y = transform.position.y;
+        return Vector3.Angle(pos - transform.position, transform.forward);
     }
 
     float DistanceTo(Vector3 position)
     {
+        Vector3 pos = position;
+        pos.y = transform.position.y;
         return Vector3.Distance(position, transform.position);
     }
 
