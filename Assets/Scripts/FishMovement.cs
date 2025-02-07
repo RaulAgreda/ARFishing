@@ -129,6 +129,7 @@ public class FishMovement : MonoBehaviour
                 {
                     GoBack();
                     AudioManager.instance.PlayClip(baitBittenAudio, false);
+                    bait.GetComponent<Animator>().SetTrigger("Bite");
                     _currentFishState = FishState.movingBack;
                 }
             }

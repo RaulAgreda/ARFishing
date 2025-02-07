@@ -58,6 +58,8 @@ public class FishSpawner : MonoBehaviour
     IEnumerator CatchTimer(int fishId)
     {
         AudioManager.instance.PlayClip(catchingAudio, true);
+        Animator anim = bait.GetComponent<Animator>();
+        anim.SetBool("Bitten", true);
         float timer = 0;
         while(timer < catchTime)
         {
@@ -69,12 +71,14 @@ public class FishSpawner : MonoBehaviour
                 catchAlert.gameObject.SetActive(false);
                 FindFirstObjectByType<FishDialogs>().GetRandomFish();
                 AudioManager.instance.PlayClip(fishCaughtAudio, false);
+                anim.SetBool("Bitten", false);
                 yield break;
             }
             yield return null;
             timer += Time.deltaTime;
         }
         AudioManager.instance.PlayClip(fishLostAudio, false);
+        anim.SetBool("Bitten", false);
         DespawnFish(fishId);
         catchAlert.gameObject.SetActive(false);
         FindFirstObjectByType<FishDialogs>().LostCatch();
