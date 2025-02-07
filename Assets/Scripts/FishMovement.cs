@@ -19,6 +19,7 @@ public class FishMovement : MonoBehaviour
     [SerializeField] float detectionAngle = 15f;
     [SerializeField] float maxDetectionDistance = 0.1f;
     [SerializeField] float changeMovementProbability = 0.01f;
+    [SerializeField] AudioClip baitBittenAudio;
     public int fishId;
     public Transform bait;
     private Vector3 currentTargetPos;
@@ -127,6 +128,7 @@ public class FishMovement : MonoBehaviour
                 else
                 {
                     GoBack();
+                    AudioManager.instance.PlayClip(baitBittenAudio, false);
                     _currentFishState = FishState.movingBack;
                 }
             }
