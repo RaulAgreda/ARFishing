@@ -9,7 +9,6 @@ public class FishingRodRope : MonoBehaviour
     private Vector3[] prevChainNodes;
     public Transform fishingRodTip;
     public Transform bait;
-
     LineRenderer lineR;
 
     private void Awake()

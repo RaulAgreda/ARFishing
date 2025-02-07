@@ -11,6 +11,10 @@ public class FishingRod : MonoBehaviour
     
     public static FishingRod Instance { get; private set; }
 
+    public AudioClip baitOnWaterSound;
+    [SerializeField]
+    bool baitOnWater = false;
+
     private void Awake() {
         if (Instance == null)
             Instance = this;
@@ -22,6 +26,19 @@ public class FishingRod : MonoBehaviour
         Vector3 newPosition = Vector3.Lerp(bait.position, baitPos, lerpTime * Time.deltaTime);
         newPosition.y = baitPos.y;
         bait.position = newPosition;
+    }
+
+    private void LateUpdate() {
+        if (IsBaitOnWater())
+        {
+            if (!baitOnWater)
+            {
+                AudioManager.instance.PlayClip(baitOnWaterSound, false);
+                baitOnWater = true;
+            }
+        }
+        else
+            baitOnWater = false;
     }
 
     bool TryGetClosestGround(out Vector3 hit)
@@ -46,9 +63,10 @@ public class FishingRod : MonoBehaviour
 
     public bool IsBaitOnWater()
     {
-        Ray ray = new Ray(bait.position + new Vector3(0, 0.1f, 0), Vector3.down);
+        Ray ray = new(bait.position + new Vector3(0, 0.1f, 0), Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, baitRaycastLength, LayerMask.GetMask("Ground")))
         {
+            Debug.Log(hit.collider.gameObject.name, hit.collider.gameObject);
             return true;
         }
         return false;

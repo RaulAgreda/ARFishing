@@ -6,9 +6,11 @@ using UnityEngine.XR.ARFoundation;
 
 public class FishMovement : MonoBehaviour
 {
-    enum FishState { Idle, RandomMove, FollowingTarget, lookToBait, movingToBait, movingBack, bittenBait };
+    public enum FishState { Idle, RandomMove, FollowingTarget, lookToBait, movingToBait, movingBack, bittenBait };
 
-    FishState currentFishState;
+    public FishState CurrentFishState { get => _currentFishState; }
+    public float currentLifeTime = 0;
+    FishState _currentFishState;
     [SerializeField] float maxSpeed = 1;
     [SerializeField] float minSpeed = 0.1f;
     [SerializeField] float movingToBaitSpeed = 0.1f;
@@ -16,10 +18,12 @@ public class FishMovement : MonoBehaviour
     [SerializeField] float rotationLerp = 0.5f;
     [SerializeField] float detectionAngle = 15f;
     [SerializeField] float maxDetectionDistance = 0.1f;
+    [SerializeField] float changeMovementProbability = 0.01f;
     public int fishId;
     public Transform bait;
     private Vector3 currentTargetPos;
     private float currentSpeed;
+    Animator anim;
 
     ARPlaneManager planeManager;
     float _backDistance = 0;
@@ -27,7 +31,10 @@ public class FishMovement : MonoBehaviour
     public UnityAction<int> OnCatch;
 
     private void Start() {
+        anim = GetComponent<Animator>();
         planeManager = FindFirstObjectByType<ARPlaneManager>();
+        currentLifeTime = 0;
+        StartCoroutine(RandomDirection());
     }
 
     void LookTarget(Vector3 targetPosition)
@@ -71,67 +78,80 @@ public class FishMovement : MonoBehaviour
     }
 
     private void Update() {
-        if (currentFishState == FishState.Idle)
+        if (_currentFishState == FishState.Idle)
         {
             currentTargetPos = transform.position + 
             new Vector3(Random.Range(-1, 1f), 0, Random.Range(-1,1f)).normalized * randomRadius;
-            currentFishState = FishState.RandomMove;
+            _currentFishState = FishState.RandomMove;
             currentSpeed = Random.Range(minSpeed, maxSpeed);
         }
-        else if (currentFishState == FishState.RandomMove)
+        else if (_currentFishState == FishState.RandomMove)
         {
             LookTarget(currentTargetPos);
             GoForward();
             if (DistanceTo(currentTargetPos) < 0.001f)
             {
-                currentFishState = FishState.Idle;
+                _currentFishState = FishState.Idle;
             }
             if (DetectBait())
             {
-                currentFishState = FishState.lookToBait;
+                _currentFishState = FishState.lookToBait;
             }
         }
-        else if (currentFishState == FishState.lookToBait)
+        else if (_currentFishState == FishState.lookToBait)
         {
             float angle = AngleTo(bait.position);
             // print("Angle is: " + angle);
             LookTarget(bait.position);
             if (angle < 1f)
-                currentFishState = FishState.movingToBait;
+                _currentFishState = FishState.movingToBait;
         }
-        else if (currentFishState == FishState.movingToBait)
+        else if (_currentFishState == FishState.movingToBait)
         {
             currentSpeed = movingToBaitSpeed;
             LookTarget(bait.position);
             GoForward();
             if (!DetectBait())
             {
-                currentFishState = FishState.Idle;
+                _currentFishState = FishState.Idle;
             }
             if (DistanceTo(bait.position) < 0.01f)
             {
-                if (Random.Range(0,1f) < 0.25f)
+                if (Random.value < 0.25f)
                 {
-                    currentFishState = FishState.bittenBait;
+                    _currentFishState = FishState.bittenBait;
                     OnCatch.Invoke(fishId);
+                    anim.SetTrigger("Bite");
                     print("Bitten!");
                 }
                 else
                 {
                     GoBack();
-                    currentFishState = FishState.movingBack;
+                    _currentFishState = FishState.movingBack;
                 }
             }
         }
-        else if (currentFishState == FishState.movingBack)
+        else if (_currentFishState == FishState.movingBack)
         {
             if (DistanceTo(bait.position) <= _backDistance)
                 GoBack();
             else
-                currentFishState = FishState.movingToBait;
+                _currentFishState = FishState.movingToBait;
         }
+
+        currentLifeTime += Time.deltaTime;
     }
     
+    IEnumerator RandomDirection()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            if (_currentFishState == FishState.RandomMove && Random.value < changeMovementProbability)
+                _currentFishState = FishState.Idle;
+        }
+    }
+
     private void OnDrawGizmos() {
         // Draw current target pos
         Gizmos.color = Color.red;

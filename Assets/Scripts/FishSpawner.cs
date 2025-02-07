@@ -8,8 +8,15 @@ public class FishSpawner : MonoBehaviour
     [SerializeField] float spawnRadius = 1;
     [SerializeField] float spawnTime = 0.5f;
     [SerializeField] float catchTime = 0.5f;
+    [SerializeField] float maxFishDistanceFromCamera = 2f;
+    [SerializeField] float fishLifeTime = 30f;
     [SerializeField] GameObject fishPrefab;
-    Dictionary<int, GameObject> currentFish = new();
+    public AudioClip catchingAudio;
+    public AudioClip fishCaughtAudio;
+    public AudioClip fishLostAudio;
+
+
+    readonly Dictionary<int, GameObject> currentFish = new();
     public Transform catchAlert;
     public Transform bait;
     int _fishId = 0;
@@ -50,6 +57,7 @@ public class FishSpawner : MonoBehaviour
 
     IEnumerator CatchTimer(int fishId)
     {
+        AudioManager.instance.PlayClip(catchingAudio, true);
         float timer = 0;
         while(timer < catchTime)
         {
@@ -60,14 +68,14 @@ public class FishSpawner : MonoBehaviour
                 currentFish.Remove(fishId);
                 catchAlert.gameObject.SetActive(false);
                 FindFirstObjectByType<FishDialogs>().GetRandomFish();
+                AudioManager.instance.PlayClip(fishCaughtAudio, false);
                 yield break;
             }
             yield return null;
             timer += Time.deltaTime;
         }
-        StartCoroutine(FishSpawnAnimation(currentFish[fishId].GetComponentInChildren<SpriteRenderer>(), false));
-        Destroy(currentFish[fishId], spawnTime + 0.1f);
-        currentFish.Remove(fishId);
+        AudioManager.instance.PlayClip(fishLostAudio, false);
+        DespawnFish(fishId);
         catchAlert.gameObject.SetActive(false);
         FindFirstObjectByType<FishDialogs>().LostCatch();
     }
@@ -91,7 +99,33 @@ public class FishSpawner : MonoBehaviour
     }
 
     private void Update() {
-        // print("IsBait on water: " + IsBaitOnWater());
+        // Fix Fishes Y position to the plane height
+        if (TryGetClosestPlane(out Vector3 hitPoint))
+        {
+            foreach(var fish in currentFish)
+            {
+                Transform fishTr = fish.Value.transform;
+                fishTr.position = new(fishTr.position.x, hitPoint.y, fishTr.position.z);
+            }
+        }
+
+        // Kill fishes that are too old
+        List<int> fishesToRemove = new();
+
+        foreach (var fish in currentFish)            
+            if (fish.Value.TryGetComponent(out FishMovement fishM))
+                if (fishM.CurrentFishState == FishMovement.FishState.RandomMove && fishM.currentLifeTime > fishLifeTime)
+                    fishesToRemove.Add(fish.Key);
+
+        foreach (int fishId in fishesToRemove)
+            DespawnFish(fishId);
+    }
+
+    private void DespawnFish(int fishId)
+    {
+        StartCoroutine(FishSpawnAnimation(currentFish[fishId].GetComponentInChildren<SpriteRenderer>(), false));
+        Destroy(currentFish[fishId], spawnTime + 0.1f);
+        currentFish.Remove(fishId);
     }
 
     private IEnumerator StartSpawning()

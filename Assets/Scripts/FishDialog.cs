@@ -7,6 +7,7 @@ public class FishDialogs : MonoBehaviour
 {
     public TextMeshProUGUI fishDescription;
     public GameObject fishPanel;
+    public GameObject informationPanel;
     public RectTransform fishImageTransform;
     public FishData[] fishData = 
     {
@@ -19,9 +20,12 @@ public class FishDialogs : MonoBehaviour
         new("Esturión", "¡He pescado un esturión!\nMe merezco una ovación." , Vector2.zero),
         new("Pez cirujano", "¡He pescado un pez cirujano!\n¡El esfuerzo no ha sido en vano.", Vector2.zero)
     };
+    Animator anim;
 
     private void Start() {
+        anim = GetComponent<Animator>();
         fishPanel.SetActive(false);
+        informationPanel.SetActive(false);
     }
 
     public void GetRandomFish()
@@ -31,24 +35,23 @@ public class FishDialogs : MonoBehaviour
         fishDescription.text = text;
         fishImageTransform.localPosition = randomFish.imageCoords;
         fishPanel.SetActive(true);
-        StartCoroutine(ClearTextsCoroutine());
+        anim.SetTrigger("Catch");
     }
 
     public void LostCatch()
     {
         fishDescription.text = "Jaja se te ha escapado, vaya inútil! XD";
         fishImageTransform.localPosition = new(-9999, -9999);
-        fishPanel.SetActive(true);
-        StartCoroutine(ClearTextsCoroutine());
+        // fishPanel.SetActive(true);
+        informationPanel.SetActive(true);
+        StartCoroutine(HideInfoPanel());
     }
 
-    IEnumerator ClearTextsCoroutine()
+    IEnumerator HideInfoPanel()
     {
-        yield return new WaitForSeconds(5);
-        fishPanel.SetActive(false);
+        yield return new WaitForSeconds(3);
+        informationPanel.SetActive(false);
     }
-
-
 }
 
 [System.Serializable]
