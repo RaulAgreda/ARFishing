@@ -1060,6 +1060,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2512387470528047737, guid: 48cb3fb68c91eb94999fd99957eb0cae,
         type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512387470528047737, guid: 48cb3fb68c91eb94999fd99957eb0cae,
+        type: 3}
       propertyPath: m_PlanePrefab
       value: 
       objectReference: {fileID: 1585201990951412, guid: 886609fc1566e4c27b399f1095d6de18,
@@ -1631,12 +1636,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 989426670}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4dea56a9eaadd1c439095de4f9a371cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SerializedLibrary: {fileID: 11400000, guid: 69fbd0a3b7d405c458ea1070b1485cbb,
+  m_SerializedLibrary: {fileID: 11400000, guid: c0e8c353ccaf9de44bfd7705bf10dd81,
     type: 2}
   m_MaxNumberOfMovingImages: 1
   m_TrackedImagePrefab: {fileID: 755522835417283083, guid: d21e4d8606a14bc4fadea9a86c742e0b,
@@ -3143,7 +3148,7 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f23b0297baa0bf241935b6534d72716a, type: 3}
---- !u!1001 &7168334778233394228
+--- !u!1001 &7310166144107836711
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -3230,4 +3235,4 @@ SceneRoots:
   - {fileID: 1780012203}
   - {fileID: 793109202}
   - {fileID: 1131481443}
-  - {fileID: 7168334778233394228}
+  - {fileID: 7310166144107836711}
