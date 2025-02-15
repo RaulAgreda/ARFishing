@@ -69,7 +69,7 @@ public class FishSpawner : MonoBehaviour
                 Destroy(currentFish[fishId]);
                 currentFish.Remove(fishId);
                 catchAlert.gameObject.SetActive(false);
-                FindFirstObjectByType<FishDialogs>().GetRandomFish();
+                FindFirstObjectByType<FishDB>().GetRandomFish();
                 AudioManager.instance.PlayClip(fishCaughtAudio, false);
                 anim.SetBool("Bitten", false);
                 yield break;
@@ -81,7 +81,7 @@ public class FishSpawner : MonoBehaviour
         anim.SetBool("Bitten", false);
         DespawnFish(fishId);
         catchAlert.gameObject.SetActive(false);
-        FindFirstObjectByType<FishDialogs>().LostCatch();
+        FindFirstObjectByType<FishDB>().LostCatch();
     }
 
     private bool TryGetClosestPlane(out Vector3 spawnPosition)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class FishDialogs : MonoBehaviour
+public class FishDB : MonoBehaviour
 {
     public TextMeshProUGUI fishDescription;
     public GameObject fishPanel;
@@ -60,6 +60,7 @@ public class FishData
     public string name;
     public string description;
     public Vector2 imageCoords;
+    public GameObject fishPrefab;
 
     public FishData(string name, string description, Vector2 imageCoords)
     {
