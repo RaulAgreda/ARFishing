@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "LoPescas.sln"
+    "dotnet.defaultSolution": "ARFishing.sln"
 }
