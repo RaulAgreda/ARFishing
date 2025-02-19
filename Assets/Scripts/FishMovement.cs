@@ -19,22 +19,25 @@ public class FishMovement : MonoBehaviour
     [SerializeField] float detectionAngle = 15f;
     [SerializeField] float maxDetectionDistance = 0.1f;
     [SerializeField] float changeMovementProbability = 0.01f;
+    [SerializeField] float spawnTime = 1f;
+    [SerializeField] float fishLifeTime = 30f;
     [SerializeField] AudioClip baitBittenAudio;
     public int fishId;
-    public Transform bait;
+    private Transform bait;
     private Vector3 currentTargetPos;
     private float currentSpeed;
     Animator anim;
 
-    ARPlaneManager planeManager;
     float _backDistance = 0;
 
-    public UnityAction<int> OnCatch;
+    public UnityAction<FishMovement> OnCatch;
+    public UnityAction<int> OnDestroy;
 
     private void Start() {
+        bait = GameObject.FindGameObjectWithTag("Bait").transform;
         anim = GetComponent<Animator>();
-        planeManager = FindFirstObjectByType<ARPlaneManager>();
         currentLifeTime = 0;
+        StartCoroutine(FishSpawnAnimation(true));
         StartCoroutine(RandomDirection());
     }
 
@@ -55,7 +58,10 @@ public class FishMovement : MonoBehaviour
     {
         float angle = AngleTo(bait.position);
         float distance = DistanceTo(bait.position);
-        return angle <= detectionAngle / 2 && distance < maxDetectionDistance && FishingRod.Instance.IsBaitOnWater();
+
+        return FishingRod.Instance.fishingState == FishingRod.FishingState.None 
+        && angle <= detectionAngle / 2 && distance < maxDetectionDistance 
+        && FishingRod.Instance.IsBaitOnWater();
     }
 
     float AngleTo(Vector3 position)
@@ -98,6 +104,9 @@ public class FishMovement : MonoBehaviour
             {
                 _currentFishState = FishState.lookToBait;
             }
+            // Despawn the fish if it is too old
+            if (currentLifeTime > fishLifeTime)
+                DespawnFish();
         }
         else if (_currentFishState == FishState.lookToBait)
         {
@@ -121,7 +130,7 @@ public class FishMovement : MonoBehaviour
                 if (Random.value < 0.25f)
                 {
                     _currentFishState = FishState.bittenBait;
-                    OnCatch.Invoke(fishId);
+                    OnCatch.Invoke(this);
                     anim.SetTrigger("Bite");
                     print("Bitten!");
                 }
@@ -153,6 +162,32 @@ public class FishMovement : MonoBehaviour
             if (_currentFishState == FishState.RandomMove && Random.value < changeMovementProbability)
                 _currentFishState = FishState.Idle;
         }
+    }
+
+    IEnumerator FishSpawnAnimation(bool spawn)
+    {
+        // Fade the fish from transparent to opaque
+        float time = 0;
+        var fishRenderer = GetComponentInChildren<SpriteRenderer>();
+        Color color = fishRenderer.color;
+        while (time < spawnTime)
+        {
+            color.a = time / spawnTime;
+            if (!spawn)
+                color.a = 1 - color.a;
+            fishRenderer.color = color;
+            time += Time.deltaTime;
+            yield return null;
+        }
+        color.a = spawn? 1: 0;
+        fishRenderer.color = color;
+    }
+
+    public void DespawnFish()
+    {
+        StartCoroutine(FishSpawnAnimation(false));
+        OnDestroy.Invoke(fishId);
+        Destroy(gameObject, spawnTime + 0.1f);
     }
 
     private void OnDrawGizmos() {

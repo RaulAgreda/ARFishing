@@ -6,18 +6,9 @@ using UnityEngine.Events;
 public class FishSpawner : MonoBehaviour
 {
     [SerializeField] float spawnRadius = 1;
-    [SerializeField] float spawnTime = 0.5f;
-    [SerializeField] float catchTime = 0.5f;
-    [SerializeField] float maxFishDistanceFromCamera = 2f;
-    [SerializeField] float fishLifeTime = 30f;
     [SerializeField] GameObject fishPrefab;
-    public AudioClip catchingAudio;
-    public AudioClip fishCaughtAudio;
-    public AudioClip fishLostAudio;
-
 
     readonly Dictionary<int, GameObject> currentFish = new();
-    public Transform catchAlert;
     public Transform bait;
     int _fishId = 0;
 
@@ -42,46 +33,13 @@ public class FishSpawner : MonoBehaviour
         Quaternion.Euler(0, Random.Range(0, 360), 0));
         currentFish.Add(_fishId, newFish);
         FishMovement fish = newFish.GetComponent<FishMovement>();
-        fish.bait = bait;
         fish.fishId = _fishId;
-        fish.OnCatch += OnBait;
-        StartCoroutine(FishSpawnAnimation(newFish.GetComponentInChildren<SpriteRenderer>(), spawn:true));
-        _fishId++;
-    }
-
-    private void OnBait(int fishId)
-    {
-        catchAlert.gameObject.SetActive(true);
-        StartCoroutine(CatchTimer(fishId));
-    }
-
-    IEnumerator CatchTimer(int fishId)
-    {
-        AudioManager.instance.PlayClip(catchingAudio, true);
-        Animator anim = bait.GetComponent<Animator>();
-        anim.SetBool("Bitten", true);
-        float timer = 0;
-        while(timer < catchTime)
+        fish.OnDestroy += id =>
         {
-            if (!FishingRod.Instance.IsBaitOnWater())
-            {
-                print("Yeah! I caught a fish");
-                Destroy(currentFish[fishId]);
-                currentFish.Remove(fishId);
-                catchAlert.gameObject.SetActive(false);
-                FindFirstObjectByType<FishDB>().GetRandomFish();
-                AudioManager.instance.PlayClip(fishCaughtAudio, false);
-                anim.SetBool("Bitten", false);
-                yield break;
-            }
-            yield return null;
-            timer += Time.deltaTime;
-        }
-        AudioManager.instance.PlayClip(fishLostAudio, false);
-        anim.SetBool("Bitten", false);
-        DespawnFish(fishId);
-        catchAlert.gameObject.SetActive(false);
-        FindFirstObjectByType<FishDB>().LostCatch();
+            currentFish.Remove(id);
+        };
+        fish.OnCatch += FishingRod.Instance.CatchFish;
+        _fishId++;
     }
 
     private bool TryGetClosestPlane(out Vector3 spawnPosition)
@@ -99,7 +57,6 @@ public class FishSpawner : MonoBehaviour
     private void Start() {
         _fishId = 0;
         StartCoroutine(StartSpawning());
-        catchAlert.gameObject.SetActive(false);
     }
 
     private void Update() {
@@ -112,24 +69,6 @@ public class FishSpawner : MonoBehaviour
                 fishTr.position = new(fishTr.position.x, hitPoint.y, fishTr.position.z);
             }
         }
-
-        // Kill fishes that are too old
-        List<int> fishesToRemove = new();
-
-        foreach (var fish in currentFish)            
-            if (fish.Value.TryGetComponent(out FishMovement fishM))
-                if (fishM.CurrentFishState == FishMovement.FishState.RandomMove && fishM.currentLifeTime > fishLifeTime)
-                    fishesToRemove.Add(fish.Key);
-
-        foreach (int fishId in fishesToRemove)
-            DespawnFish(fishId);
-    }
-
-    private void DespawnFish(int fishId)
-    {
-        StartCoroutine(FishSpawnAnimation(currentFish[fishId].GetComponentInChildren<SpriteRenderer>(), false));
-        Destroy(currentFish[fishId], spawnTime + 0.1f);
-        currentFish.Remove(fishId);
     }
 
     private IEnumerator StartSpawning()
@@ -143,23 +82,5 @@ public class FishSpawner : MonoBehaviour
                 // yield break;
             }
         }
-    }
-
-    IEnumerator FishSpawnAnimation(SpriteRenderer newFishRenderer, bool spawn)
-    {
-        // Fade the fish from transparent to opaque
-        float time = 0;
-        Color color = newFishRenderer.color;
-        while (time < spawnTime)
-        {
-            color.a = time / spawnTime;
-            if (!spawn)
-                color.a = 1 - color.a;
-            newFishRenderer.color = color;
-            time += Time.deltaTime;
-            yield return null;
-        }
-        color.a = spawn? 1: 0;
-        newFishRenderer.color = color;
     }
 }

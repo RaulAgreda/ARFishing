@@ -21,6 +21,11 @@ public class AudioManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
     
+    public void PlayOneShot(AudioClip clip)
+    {
+        audioSource.PlayOneShot(clip);
+    }
+
     public void PlayClip(AudioClip clip, bool loop)
     {
         if (audioSource.isPlaying)

@@ -5,10 +5,6 @@ using UnityEngine;
 
 public class FishDB : MonoBehaviour
 {
-    public TextMeshProUGUI fishDescription;
-    public GameObject fishPanel;
-    public GameObject informationPanel;
-    public RectTransform fishImageTransform;
     public FishData[] fishData = 
     {
         new("Atún", "¡He pescado un atún!\nEn estas aguas no es muy común…", Vector2.zero),
@@ -20,37 +16,30 @@ public class FishDB : MonoBehaviour
         new("Esturión", "¡He pescado un esturión!\nMe merezco una ovación." , Vector2.zero),
         new("Pez cirujano", "¡He pescado un pez cirujano!\n¡El esfuerzo no ha sido en vano.", Vector2.zero)
     };
-    Animator anim;
 
-    private void Start() {
-        anim = GetComponent<Animator>();
-        fishPanel.SetActive(false);
-        informationPanel.SetActive(false);
+    public static FishDB Instance { get; private set; }
+
+    void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
     }
 
-    public void GetRandomFish()
+    void Start()
     {
-        var randomFish = fishData[Random.Range(0, fishData.Length)];
-        string text = randomFish.description.Replace("\\n", "\n");
-        fishDescription.text = text;
-        fishImageTransform.localPosition = randomFish.imageCoords;
-        fishPanel.SetActive(true);
-        anim.SetTrigger("Catch");
+        ShowFish(null);
     }
 
-    public void LostCatch()
+    public FishData GetRandomFish()
     {
-        fishDescription.text = "Jaja se te ha escapado, vaya inútil! XD";
-        fishImageTransform.localPosition = new(-9999, -9999);
-        // fishPanel.SetActive(true);
-        informationPanel.SetActive(true);
-        StartCoroutine(HideInfoPanel());
+        return fishData[Random.Range(0, fishData.Length)];
     }
 
-    IEnumerator HideInfoPanel()
+    public void ShowFish(FishData fish)
     {
-        yield return new WaitForSeconds(3);
-        informationPanel.SetActive(false);
+        foreach(var f in fishData)
+            f.sceneFishInstance.SetActive(fish == f);
+
     }
 }
 
@@ -60,7 +49,7 @@ public class FishData
     public string name;
     public string description;
     public Vector2 imageCoords;
-    public GameObject fishPrefab;
+    public GameObject sceneFishInstance;
 
     public FishData(string name, string description, Vector2 imageCoords)
     {

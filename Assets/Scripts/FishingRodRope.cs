@@ -56,6 +56,8 @@ public class FishingRodRope : MonoBehaviour
                 chainNodes[^1] = new Vector3(chainNodes[^1].x, hit.point.y, chainNodes[^1].z);
         // Update bait position
         bait.position = chainNodes[^1];
+        // Align Y axis to the last chain node
+        // bait.up = chainNodes[^2] - chainNodes[^1];
         // Ensure the y position is not lower than the next node
         for (int i = 1; i < chainLength - 1; i++)
             if (chainNodes[i].y < chainNodes[^1].y)
