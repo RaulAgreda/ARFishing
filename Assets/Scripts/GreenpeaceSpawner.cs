@@ -59,7 +59,10 @@ public class GreenpeaceSpawner : MonoBehaviour
                 for (int i = 0; i < numberOfShips; i++)
                 {
                     GameObject ship = Instantiate(shipPrefab, RandomPointOutsideScreen(hit.point, spawnDistance), Quaternion.identity);
-                    
+                    var shipController = ship.GetComponent<ShipController>();
+                    Vector3 moveToTarget = RandomScreenPoint(hit.point);
+                    Vector3 moveTarget = (moveToTarget - ship.transform.position).normalized * spawnDistance * 3 + ship.transform.position;
+                    shipController.Move(moveTarget);
                 }
                 haveSpawned = true;
             }
