@@ -675,7 +675,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.03872133, y: 0.03872133, z: 0.03872133}
+  m_LocalScale: {x: 0.021745512, y: 0.021745512, z: 0.021745512}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8242707125094579881}
@@ -869,6 +869,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shipVelocity: 0.1
+  yawCannonAxis: {fileID: 8473530465466803225}
+  pitchCannonAxis: {fileID: 1241409566621833115}
 --- !u!1 &9048628154357503587
 GameObject:
   m_ObjectHideFlags: 0
