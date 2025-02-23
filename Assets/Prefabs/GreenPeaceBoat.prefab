@@ -868,9 +868,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0004cd4c904426b4cbc6de8c069b1ba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shipVelocity: 0.1
+  shipVelocity: 0.01
+  pointVelocity: 45
+  fireCooldown: 5
   yawCannonAxis: {fileID: 8473530465466803225}
   pitchCannonAxis: {fileID: 1241409566621833115}
+  projectilePrefab: {fileID: 2130828608617964389, guid: a09efccfb6a70034fbb26a8744b4e25c,
+    type: 3}
+  projectileSpeed: 0.2
 --- !u!1 &9048628154357503587
 GameObject:
   m_ObjectHideFlags: 0

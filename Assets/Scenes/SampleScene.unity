@@ -1517,7 +1517,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!95 &370064941
 Animator:
   serializedVersion: 5
@@ -4829,6 +4829,11 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: bfc91a90cc1b3c949a820d071ae9f550, type: 3}
     - target: {fileID: 3907497774777493928, guid: 045371746b53e4840b212522c00f55f5,
         type: 3}
+      propertyPath: maxFishEaten
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3907497774777493928, guid: 045371746b53e4840b212522c00f55f5,
+        type: 3}
       propertyPath: deathParticles
       value: 
       objectReference: {fileID: 561924691146018387, guid: f029b92aecbdab0448697637e627a573,
@@ -5233,27 +5238,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 168818455192710426, guid: 18e272455108a1a408deba0b3b9fb294,
-        type: 3}
-      propertyPath: fireCooldown
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 168818455192710426, guid: 18e272455108a1a408deba0b3b9fb294,
-        type: 3}
-      propertyPath: shipVelocity
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 168818455192710426, guid: 18e272455108a1a408deba0b3b9fb294,
-        type: 3}
-      propertyPath: pointVelocity
-      value: 45
-      objectReference: {fileID: 0}
-    - target: {fileID: 168818455192710426, guid: 18e272455108a1a408deba0b3b9fb294,
-        type: 3}
-      propertyPath: projectilePrefab
-      value: 
-      objectReference: {fileID: 2130828608617964389, guid: a09efccfb6a70034fbb26a8744b4e25c,
-        type: 3}
     - target: {fileID: 2606171038954466223, guid: 18e272455108a1a408deba0b3b9fb294,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -5308,6 +5292,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GreenPeaceBoat
+      objectReference: {fileID: 0}
+    - target: {fileID: 8115865633790934105, guid: 18e272455108a1a408deba0b3b9fb294,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

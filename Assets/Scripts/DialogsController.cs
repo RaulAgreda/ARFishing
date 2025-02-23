@@ -17,7 +17,7 @@ public class DialogsController : MonoBehaviour
         "Espera un momento...",
         "Esa cosa acaba de explotar ¿verdad?",
         "Será mejor que desaparezcamos antes de que haya problemas",
-        "¡Mierda demasiado tarde!",
+        "¡Mierda Greenpeace!",
     };
     void Awake()
     {
@@ -48,6 +48,7 @@ public class DialogsController : MonoBehaviour
         {
             UIPanel.SetActive(false);
             StartCoroutine(ExecuteAfterTime(3, () => { GameUI.Instance.ShowInfo(dialogs[3]); }));
+            FindFirstObjectByType<GreenpeaceSpawner>().StartSpawning();
         }
         eventIdx++;
     }
@@ -69,7 +70,7 @@ public class DialogsController : MonoBehaviour
         UIPanel.SetActive(true);
         while (memeFace.color.a < 1)
         {
-            memeFace.color += new Color(0, 0, 0, 0.01f);
+            memeFace.color += new Color(0, 0, 0, Time.deltaTime);
             yield return null;
         }
         yield return new WaitForSeconds(1);
