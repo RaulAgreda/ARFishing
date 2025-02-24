@@ -17,7 +17,8 @@ public class DialogsController : MonoBehaviour
         "Espera un momento...",
         "Esa cosa acaba de explotar ¿verdad?",
         "Será mejor que desaparezcamos antes de que haya problemas",
-        "¡Mierda demasiado tarde!",
+        "¡Mierda Greenpeace!",
+        "¡Pesca las minas y reviéntalos!"
     };
     void Awake()
     {
@@ -47,7 +48,21 @@ public class DialogsController : MonoBehaviour
         else if (eventIdx == 3)
         {
             UIPanel.SetActive(false);
-            StartCoroutine(ExecuteAfterTime(3, () => { GameUI.Instance.ShowInfo(dialogs[3]); }));
+            StartCoroutine(ExecuteAfterTime(3, () => 
+            { 
+                GameUI.Instance.ShowInfo(dialogs[3]);
+                NextDialogEvent();
+            }
+            ));
+        }
+        else if (eventIdx == 4)
+        {
+            StartCoroutine(ExecuteAfterTime(3, () => 
+            {
+                FindFirstObjectByType<MineSpawner>().SpawnMines();
+            }
+            ));
+
         }
         eventIdx++;
     }

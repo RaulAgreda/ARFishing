@@ -7,43 +7,6 @@ public class GreenpeaceSpawner : MonoBehaviour
     public float marginAngle = 5f;
     public GameObject shipPrefab;
     public float distanceFromCenter = 0.2f;
-    Vector3 RandomScreenPoint(Vector3 groundPoint)
-    {
-        Vector3 randomScreenPoint = new(
-            Random.Range(0, Screen.width),
-            Random.Range(0, Screen.height),
-            Vector3.Distance(Camera.main.transform.position, groundPoint)
-        );
-        Vector3 randomWorldPoint = Camera.main.ScreenToWorldPoint(randomScreenPoint);
-        randomWorldPoint.y = groundPoint.y;
-        return randomWorldPoint;
-    }
-
-    Vector3 RandomPointOutsideScreen(Vector3 groundPoint, float distance)
-    {
-        Vector3 randomScreenPoint;
-        if (Random.value > 0.5f)
-        {
-            randomScreenPoint = new Vector3(
-                Random.value > 0.5f ? Random.Range(-distance, distance) : Random.Range(Screen.width - distance, Screen.width + distance),
-                Random.Range(0, Screen.height),
-                Vector3.Distance(Camera.main.transform.position, groundPoint)
-            );
-        }
-        else
-        {
-            randomScreenPoint = new Vector3(
-                Random.Range(0, Screen.width),
-                Random.value > 0.5f ? Random.Range(-distance, distance) : Random.Range(Screen.height - distance, Screen.height + distance),
-                Vector3.Distance(Camera.main.transform.position, groundPoint)
-            );
-        }
-
-        Vector3 randomWorldPoint = Camera.main.ScreenToWorldPoint(randomScreenPoint);
-        randomWorldPoint.y = groundPoint.y;
-        randomWorldPoint += (randomWorldPoint - groundPoint).normalized * distance;
-        return randomWorldPoint;
-    }
 
     [SerializeField]
     bool canSpawn = false;
