@@ -10,7 +10,7 @@ public class DialogsController : MonoBehaviour
     public static DialogsController instance;
     public GameObject UIPanel;
     public Transform dialogsPanel;
-
+    int _shipsDestroyed = 0;
     float eventIdx = 0;
 
     string[] dialogs = new string[] {
@@ -18,7 +18,8 @@ public class DialogsController : MonoBehaviour
         "Esa cosa acaba de explotar ¿verdad?",
         "Será mejor que desaparezcamos antes de que haya problemas",
         "¡Mierda Greenpeace!",
-        "¡Pesca las minas y reviéntalos!"
+        "¡Pesca las minas y reviéntalos!",
+        "Bien hecho, ahora esfumémonos de aquí"
     };
     void Awake()
     {
@@ -61,11 +62,27 @@ public class DialogsController : MonoBehaviour
             StartCoroutine(ExecuteAfterTime(5, () => 
             {
                 FindFirstObjectByType<MineSpawner>().SpawnMines();
-                GameUI.Instance.ShowInfo(dialogs[4]);
+                GameUI.Instance.ShowInfo(dialogs[4], hide:false);
             }
             ));
         }
+        else if (eventIdx == 5)
+        {
+            // Final event, fade out
+            print("The end!");
+        }
         eventIdx++;
+    }
+
+    public void DestroyShip()
+    {
+        _shipsDestroyed++;
+        if (_shipsDestroyed == 3)
+        {
+            UIPanel.SetActive(true);
+            GameUI.Instance.HideInfo();
+            StartCoroutine(TextAnimationDialog(dialogs[5]));
+        }
     }
 
     IEnumerator TextAnimationDialog(string text)

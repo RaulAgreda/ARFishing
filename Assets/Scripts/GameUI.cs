@@ -42,12 +42,18 @@ public class GameUI : MonoBehaviour
         anim.SetTrigger("Catch");
     }
 
-    public void ShowInfo(string infoText)
+    public void ShowInfo(string infoText, bool hide = true)
     {
         StopAllCoroutines();
         informationPanel.SetActive(true);
         informationPanel.GetComponentInChildren<TextMeshProUGUI>().text = infoText;
-        StartCoroutine(HideInfoPanel());
+        if (hide)
+            StartCoroutine(HideInfoPanel());
+    }
+
+    public void HideInfo()
+    {
+        informationPanel.SetActive(false);
     }
 
     IEnumerator HideInfoPanel()

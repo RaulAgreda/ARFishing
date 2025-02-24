@@ -81,9 +81,12 @@ public class ShipController : MonoBehaviour
 
     public void Damage()
     {
+        if (state == ShipState.Sinking)
+            return;
+        FindFirstObjectByType<DialogsController>().DestroyShip();
         state = ShipState.Sinking;
     }
-    
+
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();

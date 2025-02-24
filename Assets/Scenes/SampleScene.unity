@@ -4770,6 +4770,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3907497774777493928, guid: 045371746b53e4840b212522c00f55f5,
         type: 3}
+      propertyPath: bodyMultiplier
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3907497774777493928, guid: 045371746b53e4840b212522c00f55f5,
+        type: 3}
       propertyPath: deathParticles
       value: 
       objectReference: {fileID: 561924691146018387, guid: f029b92aecbdab0448697637e627a573,

@@ -77,7 +77,7 @@ public class FishingRod : MonoBehaviour
         Ray ray = new(bait.position + new Vector3(0, 0.1f, 0), Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, baitRaycastLength, LayerMask.GetMask("Ground")))
         {
-            Debug.Log(hit.collider.gameObject.name, hit.collider.gameObject);
+            // Debug.Log(hit.collider.gameObject.name, hit.collider.gameObject);
             return true;
         }
         return false;

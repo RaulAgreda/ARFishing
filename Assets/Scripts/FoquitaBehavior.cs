@@ -13,6 +13,7 @@ public class FoquitaBehavior : MonoBehaviour
     public int maxFishEaten = 6;
     public AudioClip eatSound;
     public AudioClip deathSound;
+    public float bodyMultiplier = 1.2f;
     AudioSource audioSource;
     Transform bait;
     Animator anim;
@@ -40,7 +41,7 @@ public class FoquitaBehavior : MonoBehaviour
     {
         fishEaten++;
         FishingRod.Instance.EatFish();
-        bellyBone.localScale *= 1.2f;
+        bellyBone.localScale *= bodyMultiplier;
         if (fishEaten >= maxFishEaten)
         {
             var particles = Instantiate(deathParticles);
