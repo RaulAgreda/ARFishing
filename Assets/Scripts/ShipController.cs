@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class ShipController : MonoBehaviour
 {
     public float shipVelocity = 0.05f;
@@ -11,10 +12,16 @@ public class ShipController : MonoBehaviour
     public Transform pitchCannonAxis;
     public GameObject projectilePrefab;
     public float projectileSpeed = 0.2f;
+    public float sinkSpeed = 0.05f;
+    public AudioClip screamSound;
+    public AudioClip pointSound;
+    public AudioClip fireSound;
+    public ParticleSystem fireParticles;
     Vector3 targetMovePosition;
     float lastTimeFired = 0f;
+    AudioSource audioSource;
 
-    enum ShipState {Moving, Pointing, Firing};
+    enum ShipState {Moving, Pointing, Firing, Sinking};
     ShipState state = ShipState.Moving;
 
     public void Move(Vector3 target)
@@ -50,6 +57,7 @@ public class ShipController : MonoBehaviour
             if (PointingAtTarget())
             {
                 state = ShipState.Firing;
+                audioSource.Stop();
                 break;
             }
             yield return null;
@@ -67,7 +75,18 @@ public class ShipController : MonoBehaviour
     {
         GameObject projectile = Instantiate(projectilePrefab, pitchCannonAxis.position, pitchCannonAxis.rotation);
         projectile.GetComponent<Rigidbody>().velocity = pitchCannonAxis.forward * projectileSpeed;
+        audioSource.PlayOneShot(fireSound);
         lastTimeFired = Time.time;
+    }
+
+    public void Damage()
+    {
+        state = ShipState.Sinking;
+    }
+    
+    void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -79,6 +98,8 @@ public class ShipController : MonoBehaviour
             if (Vector3.Distance(transform.position, targetMovePosition) < 0.01f)
             {
                 StartCoroutine(PointAtCameraCoroutine());
+                audioSource.clip = pointSound;
+                audioSource.Play();
                 state = ShipState.Pointing;
             }
         }
@@ -87,6 +108,15 @@ public class ShipController : MonoBehaviour
             PointAtCamera();
             if (Time.time - lastTimeFired > fireCooldown)
                 Fire();
+        }
+        else if (state == ShipState.Sinking)
+        {
+            // Sinking animation
+            transform.Translate(-sinkSpeed * Time.deltaTime * Vector3.up);
+            Destroy(gameObject, 15f);
+            fireParticles.Play();
+            audioSource.clip = screamSound;
+            audioSource.Play();
         }
 
         // PointAtCamera();

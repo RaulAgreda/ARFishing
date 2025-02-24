@@ -11,8 +11,10 @@ public class FishingRod : MonoBehaviour
     public AudioClip catchingAudio;
     public AudioClip fishCaughtAudio;
     public AudioClip fishLostAudio;
-    public enum FishingState {None, CatchingFish, FishCatched}
+    public enum FishingState {None, CatchingFish, FishCatched, CatchingMines, MineCatched }
     public FishingState fishingState;
+    public AudioClip explosionSound;
+    public GameObject explosionParticles;
     Vector3 baitPos;
     [SerializeField] float baitRaycastLength = 0.105f;
     
@@ -27,6 +29,7 @@ public class FishingRod : MonoBehaviour
             Instance = this;
         catchAlert.gameObject.SetActive(false);
         fishingState = FishingState.None;
+        FindFirstObjectByType<BaitEventManager>().OnBaitEaten += BaitTriggered;
     }
 
     private void Update() {
@@ -48,6 +51,11 @@ public class FishingRod : MonoBehaviour
         }
         else
             baitOnWater = false;
+    }
+
+    public void StartFishingMines()
+    {
+        fishingState = FishingState.CatchingMines;
     }
 
     bool TryGetClosestGround(out Vector3 hit)
@@ -124,5 +132,34 @@ public class FishingRod : MonoBehaviour
         catchAlert.gameObject.SetActive(false);
         GameUI.Instance.ShowInfo("Jaja se te ha escapado, vaya inútil! XD");
         fishingState = FishingState.None;
+    }
+
+    GameObject _currentMine = null;
+
+    public void BaitTriggered(Collider obj)
+    {
+        if (fishingState == FishingState.CatchingMines)
+        {
+            if (_currentMine == null && obj.CompareTag("Mine"))
+            {
+                fishingState = FishingState.MineCatched;
+                _currentMine = obj.gameObject;
+                _currentMine.transform.SetParent(bait);
+                _currentMine.transform.localPosition = Vector3.zero;
+            }
+        }
+        else if (fishingState == FishingState.MineCatched)
+        {
+            if (obj.TryGetComponent(out ShipController ship))
+            {
+                ship.Damage();
+                // Spawn particles
+                AudioManager.instance.PlayOneShot(explosionSound);
+                Instantiate(explosionParticles, _currentMine.transform.position, Quaternion.identity);
+                Destroy(_currentMine);
+                _currentMine = null;
+                fishingState = FishingState.CatchingMines;
+            }
+        }
     }
 }

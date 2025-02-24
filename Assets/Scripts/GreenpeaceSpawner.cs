@@ -12,6 +12,11 @@ public class GreenpeaceSpawner : MonoBehaviour
     bool canSpawn = false;
     bool haveSpawned = false;
 
+    public void StartSpawning()
+    {
+        canSpawn = true;
+    }
+
     void Update()
     {
         if (!haveSpawned && canSpawn)

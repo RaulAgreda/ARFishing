@@ -48,6 +48,7 @@ public class DialogsController : MonoBehaviour
         else if (eventIdx == 3)
         {
             UIPanel.SetActive(false);
+            FindFirstObjectByType<GreenpeaceSpawner>().StartSpawning();
             StartCoroutine(ExecuteAfterTime(3, () => 
             { 
                 GameUI.Instance.ShowInfo(dialogs[3]);
@@ -57,12 +58,12 @@ public class DialogsController : MonoBehaviour
         }
         else if (eventIdx == 4)
         {
-            StartCoroutine(ExecuteAfterTime(3, () => 
+            StartCoroutine(ExecuteAfterTime(5, () => 
             {
                 FindFirstObjectByType<MineSpawner>().SpawnMines();
+                GameUI.Instance.ShowInfo(dialogs[4]);
             }
             ));
-
         }
         eventIdx++;
     }
@@ -80,11 +81,12 @@ public class DialogsController : MonoBehaviour
 
     IEnumerator StartDialogs()
     {
+        FishingRod.Instance.StartFishingMines();
         yield return new WaitForSeconds(3);
         UIPanel.SetActive(true);
         while (memeFace.color.a < 1)
         {
-            memeFace.color += new Color(0, 0, 0, 0.01f);
+            memeFace.color += new Color(0, 0, 0, Time.deltaTime);
             yield return null;
         }
         yield return new WaitForSeconds(1);

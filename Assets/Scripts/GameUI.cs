@@ -44,6 +44,7 @@ public class GameUI : MonoBehaviour
 
     public void ShowInfo(string infoText)
     {
+        StopAllCoroutines();
         informationPanel.SetActive(true);
         informationPanel.GetComponentInChildren<TextMeshProUGUI>().text = infoText;
         StartCoroutine(HideInfoPanel());
