@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameUI : MonoBehaviour
@@ -9,6 +10,7 @@ public class GameUI : MonoBehaviour
     public GameObject fishPanel;
     public GameObject informationPanel;
     public RectTransform fishImageTransform;
+    public Image fadeOutScreen;
     Animator anim;
 
     public static GameUI Instance { get; private set; }
@@ -16,6 +18,7 @@ public class GameUI : MonoBehaviour
     private void Awake() {
         if (Instance == null)
             Instance = this;
+        fadeOutScreen.color = new Color(0, 0, 0, 0);
     }
 
     private void Start() {
@@ -60,5 +63,23 @@ public class GameUI : MonoBehaviour
     {
         yield return new WaitForSeconds(3);
         informationPanel.SetActive(false);
+    }
+
+    public void FadeOut(float fadeDuration)
+    {
+        StartCoroutine(FadeOutCorroutine(fadeDuration));
+    }
+
+    IEnumerator FadeOutCorroutine(float fadeDuration)
+    {
+        fadeOutScreen.color = new Color(0, 0, 0, 0);
+        float elapsedTime = 0;
+        while (elapsedTime < fadeDuration)
+        {
+            fadeOutScreen.color = new Color(0, 0, 0, Mathf.Clamp01(elapsedTime / fadeDuration));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        fadeOutScreen.color = new Color(0, 0, 0, 1);
     }
 }

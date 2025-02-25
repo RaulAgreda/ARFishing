@@ -67,7 +67,6 @@ public class ShipController : MonoBehaviour
     bool PointingAtTarget()
     {
         float angle = Vector3.Angle(pitchCannonAxis.forward, Camera.main.transform.position - pitchCannonAxis.position);
-        Debug.Log("Angle to target: " + angle);
         return angle < 1f;
     }
 

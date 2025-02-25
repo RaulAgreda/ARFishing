@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class DialogsController : MonoBehaviour
@@ -10,9 +11,9 @@ public class DialogsController : MonoBehaviour
     public static DialogsController instance;
     public GameObject UIPanel;
     public Transform dialogsPanel;
+    public float fadeOutTime = 2f;
     int _shipsDestroyed = 0;
     float eventIdx = 0;
-
     string[] dialogs = new string[] {
         "Espera un momento...",
         "Esa cosa acaba de explotar ¿verdad?",
@@ -70,6 +71,12 @@ public class DialogsController : MonoBehaviour
         {
             // Final event, fade out
             print("The end!");
+            GameUI.Instance.FadeOut(fadeOutTime);
+            StartCoroutine(ExecuteAfterTime(fadeOutTime, () => 
+            {
+                SceneManager.LoadScene(1);
+            }
+            ));
         }
         eventIdx++;
     }
@@ -83,6 +90,11 @@ public class DialogsController : MonoBehaviour
             GameUI.Instance.HideInfo();
             StartCoroutine(TextAnimationDialog(dialogs[5]));
         }
+    }
+
+    public void Die()
+    {
+        SceneManager.LoadScene(2);
     }
 
     IEnumerator TextAnimationDialog(string text)
