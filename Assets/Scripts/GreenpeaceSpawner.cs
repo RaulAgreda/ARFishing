@@ -11,6 +11,22 @@ public class GreenpeaceSpawner : MonoBehaviour
     [SerializeField]
     bool canSpawn = false;
     bool haveSpawned = false;
+    
+    // Store ships persistently
+    private List<ShipController> spawnedShips = new List<ShipController>();
+    
+    // Helper method to detect ground plane
+    private bool TryGetClosestPlane(out Vector3 hitPoint)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMask.GetMask("Ground")))
+        {
+            hitPoint = hit.point;
+            return true;
+        }
+        hitPoint = Vector3.zero;
+        return false;
+    }
 
     public void StartSpawning()
     {
@@ -23,23 +39,23 @@ public class GreenpeaceSpawner : MonoBehaviour
         {
             if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit))
             {
-                List<ShipController> ships = new List<ShipController>();
+                spawnedShips = new List<ShipController>();
                 // First point at 0.8 screen height at the left of the screen
                 Vector3 leftPoint = CalculateSpawnPosition(new (0, 0.8f), hit.distance);
                 leftPoint.y = hit.point.y;
-                ships.Add(Instantiate(shipPrefab, leftPoint, Quaternion.identity).GetComponent<ShipController>());
+                spawnedShips.Add(Instantiate(shipPrefab, leftPoint, Quaternion.identity).GetComponent<ShipController>());
                 // Second point at 0.8 screen height at the right of the screen
                 Vector3 rightPoint = CalculateSpawnPosition(new (1, 0.7f), hit.distance);
                 print("Right point: " + rightPoint);
                 rightPoint.y = hit.point.y;
-                ships.Add(Instantiate(shipPrefab, rightPoint, Quaternion.identity).GetComponent<ShipController>());
+                spawnedShips.Add(Instantiate(shipPrefab, rightPoint, Quaternion.identity).GetComponent<ShipController>());
                 // Third point at the middle bottom of the screen
                 Vector3 bottomPoint = CalculateSpawnPosition(new (0.4f, 0), hit.distance);
                 print("Bottom point: " + bottomPoint);
                 bottomPoint.y = hit.point.y;
-                ships.Add(Instantiate(shipPrefab, bottomPoint, Quaternion.identity).GetComponent<ShipController>());
+                spawnedShips.Add(Instantiate(shipPrefab, bottomPoint, Quaternion.identity).GetComponent<ShipController>());
 
-                foreach (ShipController ship in ships)
+                foreach (ShipController ship in spawnedShips)
                 {
                     Vector3 direction = (ship.transform.position - hit.point).normalized * Random.Range(distanceFromCenter, distanceFromCenter + 0.05f);
                     Vector3 movePoint = hit.point + direction;
@@ -49,6 +65,18 @@ public class GreenpeaceSpawner : MonoBehaviour
             haveSpawned = true;
         }
         
+        // Update ships Y position to match ground height
+        if (TryGetClosestPlane(out Vector3 hitPoint) && spawnedShips != null)
+        {
+            foreach (var ship in spawnedShips)
+            {
+                if (ship != null)
+                {
+                    Vector3 position = ship.transform.position;
+                    ship.transform.position = new Vector3(position.x, hitPoint.y, position.z);
+                }
+            }
+        }
     }
 
     Vector3 CalculateSpawnPosition(Vector2 viewportPos, float spawnDistance)
